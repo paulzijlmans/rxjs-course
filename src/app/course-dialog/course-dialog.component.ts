@@ -5,21 +5,13 @@ import {
   Inject,
   OnInit,
   ViewChild,
-  ViewEncapsulation,
 } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
-import { Course } from "../model/course";
-import { FormBuilder, Validators, FormGroup } from "@angular/forms";
 import * as moment from "moment";
-import { fromEvent } from "rxjs";
-import {
-  concatMap,
-  distinctUntilChanged,
-  exhaustMap,
-  filter,
-  mergeMap,
-} from "rxjs/operators";
 import { fromPromise } from "rxjs/internal-compatibility";
+import { filter, mergeMap } from "rxjs/operators";
+import { Course } from "../model/course";
 
 @Component({
   selector: "course-dialog",
@@ -53,7 +45,7 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
     this.form.valueChanges
       .pipe(
         filter(() => this.form.valid),
-        concatMap((changes) => this.saveCourse(changes))
+        mergeMap((changes) => this.saveCourse(changes))
       )
       .subscribe();
   }
