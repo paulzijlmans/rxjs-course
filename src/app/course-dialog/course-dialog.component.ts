@@ -50,6 +50,9 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
 
     }
 
+    save() {
+      console.log('save')
+    }
 
 
     close() {
