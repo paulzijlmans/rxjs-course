@@ -7,10 +7,12 @@ import {
   ViewChild,
 } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { MatButton } from "@angular/material/button";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import * as moment from "moment";
+import { fromEvent } from "rxjs";
 import { fromPromise } from "rxjs/internal-compatibility";
-import { filter, mergeMap } from "rxjs/operators";
+import { exhaustMap, filter, mergeMap } from "rxjs/operators";
 import { Course } from "../model/course";
 
 @Component({
@@ -22,7 +24,7 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
   form: FormGroup;
   course: Course;
 
-  @ViewChild("saveButton", { static: true }) saveButton: ElementRef;
+  @ViewChild("saveButton", { static: true }) saveButton: MatButton;
 
   @ViewChild("searchInput", { static: true }) searchInput: ElementRef;
 
@@ -60,10 +62,10 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
     );
   }
 
-  ngAfterViewInit() {}
-
-  save() {
-    console.log("save");
+  ngAfterViewInit() {
+    fromEvent(this.saveButton._elementRef.nativeElement, "click")
+      .pipe(exhaustMap(() => this.saveCourse(this.form.value)))
+      .subscribe();
   }
 
   close() {
