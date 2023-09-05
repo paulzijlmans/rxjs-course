@@ -8,6 +8,7 @@ import {
 import { ActivatedRoute } from "@angular/router";
 import { Observable, concat, fromEvent } from "rxjs";
 import {
+  concatMap,
   debounceTime,
   distinctUntilChanged,
   map,
@@ -37,14 +38,15 @@ export class CourseComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    const searchLessons$ = fromEvent<any>(this.input.nativeElement, "keyup")
-      .pipe(
-        map((event) => event.target.value),
-        debounceTime(400),
-        distinctUntilChanged(),
-        switchMap((search) => this.loadLessons(search))
-      )
-      .subscribe(console.log);
+    const searchLessons$ = fromEvent<any>(
+      this.input.nativeElement,
+      "keyup"
+    ).pipe(
+      map((event) => event.target.value),
+      debounceTime(400),
+      distinctUntilChanged(),
+      switchMap((search) => this.loadLessons(search))
+    );
 
     const initialLessons$ = this.loadLessons();
 
