@@ -6,7 +6,7 @@ import {
   ViewChild,
 } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { Observable, concat, fromEvent } from "rxjs";
+import { Observable, concat, fromEvent, interval } from "rxjs";
 import {
   concatMap,
   debounceTime,
@@ -14,6 +14,8 @@ import {
   map,
   startWith,
   switchMap,
+  throttle,
+  throttleTime,
 } from "rxjs/operators";
 import { createHttpObservable } from "../common/util";
 import { Course } from "../model/course";
@@ -39,13 +41,13 @@ export class CourseComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.lessons$ = fromEvent<any>(this.input.nativeElement, "keyup").pipe(
-      map((event) => event.target.value),
-      startWith(''),
-      debounceTime(400),
-      distinctUntilChanged(),
-      switchMap((search) => this.loadLessons(search))
-    );
+    fromEvent<any>(this.input.nativeElement, "keyup")
+      .pipe(
+        map((event) => event.target.value),
+        startWith(""),
+        throttleTime(500)
+      )
+      .subscribe(console.log);
   }
 
   loadLessons(search = ""): Observable<Lesson[]> {
