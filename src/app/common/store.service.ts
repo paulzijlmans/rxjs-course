@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, from } from "rxjs";
-import { map, tap } from "rxjs/operators";
+import { filter, map, tap } from "rxjs/operators";
 import { Course } from "../model/course";
 import { createHttpObservable } from "./util";
 
@@ -25,6 +25,13 @@ export class Store {
 
   selectAdvancedCourses() {
     return this.filterByCategory("ADVANCED");
+  }
+
+  selectCourseById(courseId: number) {
+    return this.courses$.pipe(
+      map((courses) => courses.find((course) => course.id === courseId)),
+      filter((course) => !!course)
+    );
   }
 
   filterByCategory(category: string) {

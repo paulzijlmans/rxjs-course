@@ -6,8 +6,14 @@ import {
   ViewChild,
 } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { Observable, forkJoin, fromEvent } from "rxjs";
-import { map, tap, throttleTime } from "rxjs/operators";
+import { Observable, concat, fromEvent } from "rxjs";
+import {
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  switchMap,
+} from "rxjs/operators";
+import { Store } from "../common/store.service";
 import { createHttpObservable } from "../common/util";
 import { Course } from "../model/course";
 import { Lesson } from "../model/lesson";
@@ -18,37 +24,33 @@ import { Lesson } from "../model/lesson";
   styleUrls: ["./course.component.css"],
 })
 export class CourseComponent implements OnInit, AfterViewInit {
-  courseId: string;
+  courseId: number;
   course$: Observable<Course>;
   lessons$: Observable<Lesson[]>;
 
   @ViewChild("searchInput", { static: true }) input: ElementRef;
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute, private store: Store) {}
 
   ngOnInit() {
-    this.courseId = this.route.snapshot.params["id"];
-    const course$ = createHttpObservable(`/api/courses/${this.courseId}`);
-
-    const lessons$ = this.loadLessons();
-
-    forkJoin([course$, lessons$])
-      .pipe(
-        tap(([course, lessons]) => {
-          console.log("course", course);
-          console.log("lessons", lessons);
-        })
-      )
-      .subscribe();
+    this.courseId = Number.parseInt(this.route.snapshot.params["id"]);
+    this.course$ = this.store.selectCourseById(this.courseId);
   }
 
   ngAfterViewInit() {
-    fromEvent<any>(this.input.nativeElement, "keyup")
-      .pipe(
-        map((event) => event.target.value),
-        throttleTime(500)
-      )
-      .subscribe(console.log);
+    const searchLessons$ = fromEvent<any>(
+      this.input.nativeElement,
+      "keyup"
+    ).pipe(
+      map((event) => event.target.value),
+      debounceTime(400),
+      distinctUntilChanged(),
+      switchMap((search) => this.loadLessons(search))
+    );
+
+    const initialLessons$ = this.loadLessons();
+
+    this.lessons$ = concat(initialLessons$, searchLessons$);
   }
 
   loadLessons(search = ""): Observable<Lesson[]> {
