@@ -57,11 +57,11 @@
 <mat-dialog-actions>
 
     <button mat-raised-button
-            (click)="close()">
+            >
         Close
     </button>
 
-    <button mat-raised-button color="primary" #saveButton>
+    <button mat-raised-button color="primary" #saveButton (click)="save()">
         Save
     </button>
 
