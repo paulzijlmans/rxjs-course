@@ -6,12 +6,13 @@ import {
   ViewChild,
 } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { Observable, concat, fromEvent } from "rxjs";
+import { Observable, concat, forkJoin, fromEvent } from "rxjs";
 import {
   debounceTime,
   distinctUntilChanged,
   map,
   switchMap,
+  take,
 } from "rxjs/operators";
 import { Store } from "../common/store.service";
 import { createHttpObservable } from "../common/util";
@@ -34,7 +35,9 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.courseId = Number.parseInt(this.route.snapshot.params["id"]);
-    this.course$ = this.store.selectCourseById(this.courseId);
+    this.course$ = this.store.selectCourseById(this.courseId).pipe(take(1));
+
+    forkJoin([this.course$, this.loadLessons()]).subscribe(console.log);
   }
 
   ngAfterViewInit() {
