@@ -13,6 +13,7 @@ import {
   map,
   switchMap,
   take,
+  withLatestFrom,
 } from "rxjs/operators";
 import { Store } from "../common/store.service";
 import { createHttpObservable } from "../common/util";
@@ -37,7 +38,12 @@ export class CourseComponent implements OnInit, AfterViewInit {
     this.courseId = Number.parseInt(this.route.snapshot.params["id"]);
     this.course$ = this.store.selectCourseById(this.courseId).pipe(take(1));
 
-    forkJoin([this.course$, this.loadLessons()]).subscribe(console.log);
+    this.loadLessons()
+      .pipe(withLatestFrom(this.course$))
+      .subscribe(([lessons, course]) => {
+        console.log("lessons", lessons);
+        console.log("course", course);
+      });
   }
 
   ngAfterViewInit() {
